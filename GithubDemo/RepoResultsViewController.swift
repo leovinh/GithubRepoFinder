@@ -12,10 +12,11 @@ import MBProgressHUD
 // Main ViewController
 class RepoResultsViewController: UIViewController {
 
+    @IBOutlet weak var tableView: UITableView!
     var searchBar: UISearchBar!
     var searchSettings = GithubRepoSearchSettings()
 
-    var repos: [GithubRepo]!
+    var repos: [GithubRepo] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,6 +44,9 @@ class RepoResultsViewController: UIViewController {
             // Print the returned repositories to the output window
             for repo in newRepos {
                 print(repo)
+                self.repos.append(repo)
+                self.tableView.reloadData()
+                
             }   
 
             MBProgressHUD.hideHUDForView(self.view, animated: true)
@@ -76,3 +80,21 @@ extension RepoResultsViewController: UISearchBarDelegate {
         doSearch()
     }
 }
+
+extension RepoResultsViewController:UITableViewDelegate, UITableViewDataSource{
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return repos.count ?? 0
+    }
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! RepoCell
+        cell.lblRepoName.text = repos[indexPath.row].name
+        cell.lblStar.text = "\(repos[indexPath.row].stars!)"
+        cell.lblForks.text = "\(repos[indexPath.row].forks!)"
+        cell.lblOwnerName.text = repos[indexPath.row].ownerHandle
+        let url = NSURL(string: repos[indexPath.row].ownerAvatarURL!)
+        cell.avatar.setImageWithURL(url!)
+        cell.lblDescription.text = repos[indexPath.row].repoDescription
+        return cell
+    }
+}
+
